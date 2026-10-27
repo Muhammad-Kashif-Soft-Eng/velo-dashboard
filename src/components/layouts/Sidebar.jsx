@@ -58,7 +58,10 @@ export default function Sidebar() {
                 </div>
             </SidebarHeader>
 
-            <SidebarSeparator className="mx-4 w-auto" />
+            <SidebarSeparator
+                className="mx-4"
+                style={{ width: "calc(100% - 2rem)" }}
+            />
 
             <SidebarContent className="px-2 py-3">
                 <SidebarGroup className="p-0">

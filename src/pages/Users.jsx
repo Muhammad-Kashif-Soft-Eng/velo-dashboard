@@ -244,7 +244,7 @@ export default function Users() {
                                     className="z-50 outline-none"
                                     sideOffset={8}
                                 >
-                                    <Select.Popup className="w-[var(--anchor-width)] max-w-[calc(100vw-2rem)] min-w-0 origin-[var(--transform-origin)] overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-[0_20px_60px_-20px_rgba(15,23,42,0.28)] outline-none transition duration-150 data-[ending-style]:scale-[0.97] data-[ending-style]:opacity-0 data-[starting-style]:scale-[0.97] data-[starting-style]:opacity-0">
+                                    <Select.Popup className="max-h-[min(60dvh,var(--available-height))] w-[var(--anchor-width)] max-w-[calc(100vw-2rem)] min-w-0 origin-[var(--transform-origin)] overflow-y-auto overscroll-contain rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-[0_20px_60px_-20px_rgba(15,23,42,0.28)] outline-none transition duration-150 data-[ending-style]:scale-[0.97] data-[ending-style]:opacity-0 data-[starting-style]:scale-[0.97] data-[starting-style]:opacity-0">
                                         <div className="flex items-center justify-between px-3 pb-2.5 pt-2">
                                             <div>
                                                 <p className="text-xs font-semibold tracking-wide text-slate-800">Sort customers</p>
