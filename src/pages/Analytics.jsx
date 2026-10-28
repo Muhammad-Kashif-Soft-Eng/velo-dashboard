@@ -1,10 +1,13 @@
 import axios from "axios";
+import { Select } from "@base-ui/react/select";
 import {
     Activity,
     ArrowDownRight,
     ArrowUpRight,
     Boxes,
     CalendarDays,
+    Check,
+    ChevronDown,
     Download,
     LoaderCircle,
     PackageCheck,
@@ -353,23 +356,63 @@ export default function Analytics() {
                         </p>
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                        <label className="relative">
-                            <CalendarDays
-                                className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                                size={16}
-                                aria-hidden="true"
-                            />
-                            <span className="sr-only">Analytics date range</span>
-                            <select
-                                className="h-10 w-full appearance-none rounded-xl border border-white/15 bg-white/10 pl-9 pr-9 text-sm font-medium text-white outline-none transition hover:bg-white/15 focus:ring-4 focus:ring-indigo-400/20 sm:w-44 [&>option]:text-slate-900"
-                                onChange={(event) => setPeriod(event.target.value)}
-                                value={period}
+                        <Select.Root
+                            items={periods}
+                            onValueChange={(value) => setPeriod(value)}
+                            value={period}
+                        >
+                            <Select.Trigger
+                                aria-label="Analytics date range"
+                                className="group flex h-11 w-full min-w-0 items-center gap-2.5 rounded-xl border border-white/15 bg-white/[0.08] px-3 text-left text-sm text-white shadow-sm outline-none transition hover:border-white/25 hover:bg-white/[0.12] focus-visible:border-indigo-300 focus-visible:ring-4 focus-visible:ring-indigo-400/20 data-[popup-open]:border-indigo-300/60 data-[popup-open]:bg-white/[0.14] sm:w-48"
                             >
-                                {periods.map((option) => (
-                                    <option key={option.value} value={option.value}>{option.label}</option>
-                                ))}
-                            </select>
-                        </label>
+                                <span className="grid size-7 shrink-0 place-items-center rounded-lg bg-white/10 text-indigo-200 transition group-data-[popup-open]:bg-indigo-400/20 group-data-[popup-open]:text-white">
+                                    <CalendarDays size={15} aria-hidden="true" />
+                                </span>
+                                <Select.Value className="min-w-0 flex-1 truncate font-semibold" />
+                                <ChevronDown
+                                    className="shrink-0 text-slate-300 transition-transform duration-200 group-data-[popup-open]:rotate-180"
+                                    size={16}
+                                    aria-hidden="true"
+                                />
+                            </Select.Trigger>
+                            <Select.Portal>
+                                <Select.Positioner
+                                    alignItemWithTrigger={false}
+                                    className="z-50 outline-none"
+                                    sideOffset={8}
+                                >
+                                    <Select.Popup className="max-h-[min(60dvh,var(--available-height))] w-[var(--anchor-width)] max-w-[calc(100vw-2rem)] min-w-0 origin-[var(--transform-origin)] overflow-y-auto overscroll-contain rounded-2xl border border-slate-200/80 bg-white p-1.5 shadow-[0_20px_60px_-20px_rgba(15,23,42,0.28)] outline-none transition duration-150 data-[ending-style]:scale-[0.97] data-[ending-style]:opacity-0 data-[starting-style]:scale-[0.97] data-[starting-style]:opacity-0">
+                                        <div className="px-3 pb-2.5 pt-2">
+                                            <p className="text-xs font-semibold tracking-wide text-slate-800">Date range</p>
+                                            <p className="mt-0.5 text-[11px] text-slate-400">Choose a period to analyze</p>
+                                        </div>
+                                        <div className="h-px bg-slate-100" />
+                                        <Select.List className="mt-1 space-y-0.5">
+                                            {periods.map((option) => (
+                                                <Select.Item
+                                                    key={option.value}
+                                                    className="group/item flex cursor-default items-center gap-3 rounded-xl px-2.5 py-2.5 text-sm text-slate-600 outline-none transition data-[highlighted]:bg-indigo-50 data-[highlighted]:text-indigo-900 data-[selected]:bg-indigo-50/70 data-[selected]:text-indigo-900"
+                                                    label={option.label}
+                                                    value={option.value}
+                                                >
+                                                    <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-slate-50 text-slate-500 transition group-data-[highlighted]/item:bg-white group-data-[highlighted]/item:text-indigo-600 group-data-[selected]/item:bg-white group-data-[selected]/item:text-indigo-600">
+                                                        <CalendarDays size={17} aria-hidden="true" />
+                                                    </span>
+                                                    <span className="min-w-0 flex-1">
+                                                        <Select.ItemText className="block font-medium">
+                                                            {option.label}
+                                                        </Select.ItemText>
+                                                    </span>
+                                                    <Select.ItemIndicator className="grid size-5 shrink-0 place-items-center rounded-full bg-indigo-600 text-white">
+                                                        <Check size={12} strokeWidth={3} aria-hidden="true" />
+                                                    </Select.ItemIndicator>
+                                                </Select.Item>
+                                            ))}
+                                        </Select.List>
+                                    </Select.Popup>
+                                </Select.Positioner>
+                            </Select.Portal>
+                        </Select.Root>
                         <button
                             className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-3.5 text-sm font-medium text-white transition hover:bg-white/15 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-400/20 disabled:cursor-not-allowed disabled:opacity-50"
                             disabled={loading || analytics.filteredOrders.length === 0}
