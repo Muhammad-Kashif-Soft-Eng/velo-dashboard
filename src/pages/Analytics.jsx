@@ -127,14 +127,14 @@ function SummaryCard({ icon: Icon, label, value, detail, change, tone }) {
     );
 }
 
-function ChartTooltip({ active, payload, label, valueFormatter = currency }) {
+function ChartTooltip({ active, payload, label }) {
     if (!active || !payload?.length) return null;
 
     return (
         <div className="rounded-xl border border-slate-200 bg-white px-3.5 py-3 shadow-lg">
             <p className="text-xs font-medium text-slate-500">{label}</p>
             <p className="mt-1 text-sm font-semibold text-slate-900">
-                {valueFormatter(payload[0].value)}
+                {currency.format(payload[0].value)}
             </p>
         </div>
     );
