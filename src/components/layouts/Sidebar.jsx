@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
     BarChart3,
     Boxes,
@@ -8,6 +9,11 @@ import {
     Zap,
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
+import {
+    defaultWorkspaceSettings,
+    readWorkspaceSettings,
+    WORKSPACE_SETTINGS_UPDATED,
+} from "@/lib/workspace-settings";
 import {
     Sidebar as SidebarPrimitive,
     SidebarContent,
@@ -36,6 +42,26 @@ const navigation = [
 export default function Sidebar() {
     const location = useLocation();
     const { isMobile, setOpenMobile } = useSidebar();
+    const [profile, setProfile] = useState(defaultWorkspaceSettings);
+
+    useEffect(() => {
+        function syncProfile() {
+            try {
+                setProfile(readWorkspaceSettings());
+            } catch (error) {
+                console.error("Failed to load workspace profile in sidebar:", error);
+            }
+        }
+
+        syncProfile();
+        window.addEventListener(WORKSPACE_SETTINGS_UPDATED, syncProfile);
+        window.addEventListener("storage", syncProfile);
+
+        return () => {
+            window.removeEventListener(WORKSPACE_SETTINGS_UPDATED, syncProfile);
+            window.removeEventListener("storage", syncProfile);
+        };
+    }, []);
 
     return (
         <SidebarPrimitive
@@ -99,14 +125,14 @@ export default function Sidebar() {
             <SidebarFooter className="p-3">
                 <div className="flex items-center gap-3 rounded-xl border border-slate-200/70 bg-white/70 p-2.5 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:border-transparent group-data-[collapsible=icon]:bg-transparent group-data-[collapsible=icon]:p-1">
                     <div className="grid size-8 shrink-0 place-items-center rounded-full bg-slate-900 text-xs font-semibold text-white">
-                        A
+                        {profile.displayName.trim().charAt(0).toUpperCase() || "A"}
                     </div>
                     <div className="grid min-w-0 flex-1 leading-tight group-data-[collapsible=icon]:hidden">
                         <span className="truncate text-xs font-semibold text-slate-800">
-                            Admin
+                            {profile.displayName}
                         </span>
                         <span className="truncate text-[11px] text-slate-500">
-                            Dashboard access
+                            {profile.email}
                         </span>
                     </div>
                 </div>
