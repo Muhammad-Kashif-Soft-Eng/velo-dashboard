@@ -3,12 +3,14 @@ import {
     BarChart3,
     Boxes,
     LayoutDashboard,
+    LogOut,
     PackageCheck,
     Settings2,
     UsersRound,
     Zap,
 } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "@/lib/use-auth";
 import {
     defaultWorkspaceSettings,
     readWorkspaceSettings,
@@ -27,8 +29,8 @@ import {
     SidebarMenuItem,
     SidebarRail,
     SidebarSeparator,
-    useSidebar,
 } from "@/components/ui/sidebar";
+import { useSidebar } from "@/components/ui/use-sidebar";
 
 const navigation = [
     { title: "Overview", url: "/", icon: LayoutDashboard },
@@ -41,6 +43,8 @@ const navigation = [
 
 export default function Sidebar() {
     const location = useLocation();
+    const navigate = useNavigate();
+    const { logout } = useAuth();
     const { isMobile, setOpenMobile } = useSidebar();
     const [profile, setProfile] = useState(defaultWorkspaceSettings);
 
@@ -136,6 +140,18 @@ export default function Sidebar() {
                         </span>
                     </div>
                 </div>
+                <button
+                    aria-label="Sign out"
+                    className="mt-2 flex h-10 w-full items-center gap-3 rounded-xl px-3 text-sm font-medium text-slate-600 transition hover:bg-rose-50 hover:text-rose-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0"
+                    onClick={() => {
+                        logout();
+                        navigate("/login", { replace: true });
+                    }}
+                    type="button"
+                >
+                    <LogOut size={17} aria-hidden="true" />
+                    <span className="group-data-[collapsible=icon]:hidden">Sign out</span>
+                </button>
             </SidebarFooter>
             <SidebarRail />
         </SidebarPrimitive>

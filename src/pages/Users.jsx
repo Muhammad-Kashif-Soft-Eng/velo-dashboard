@@ -13,6 +13,9 @@ import {
     UsersRound,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import Pagination from "@/components/Pagination";
+
+const PAGE_SIZE = 6;
 
 const avatarColors = [
     "from-violet-500 to-indigo-500",
@@ -110,6 +113,7 @@ export default function Users() {
     const [users, setUsers] = useState([]);
     const [search, setSearch] = useState("");
     const [sortOrder, setSortOrder] = useState("name-asc");
+    const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [reloadKey, setReloadKey] = useState(0);
@@ -160,6 +164,13 @@ export default function Users() {
             return sortOrder === "name-desc" ? -nameOrder : nameOrder;
         });
     }, [users, search, sortOrder]);
+
+    const pageCount = Math.max(1, Math.ceil(filteredUsers.length / PAGE_SIZE));
+    const currentPage = Math.min(page, pageCount);
+    const pagedUsers = filteredUsers.slice(
+        (currentPage - 1) * PAGE_SIZE,
+        currentPage * PAGE_SIZE,
+    );
 
     return (
         <div className="mx-auto w-full max-w-7xl space-y-8 pb-10">
@@ -213,7 +224,10 @@ export default function Users() {
                             <span className="sr-only">Search users</span>
                             <input
                                 className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
-                                onChange={(event) => setSearch(event.target.value)}
+                                onChange={(event) => {
+                                    setSearch(event.target.value);
+                                    setPage(1);
+                                }}
                                 placeholder="Search customers..."
                                 type="search"
                                 value={search}
@@ -221,7 +235,10 @@ export default function Users() {
                         </label>
                         <Select.Root
                             items={sortOptions}
-                            onValueChange={setSortOrder}
+                            onValueChange={(value) => {
+                                setSortOrder(value);
+                                setPage(1);
+                            }}
                             value={sortOrder}
                         >
                             <Select.Trigger
@@ -332,21 +349,29 @@ export default function Users() {
                     </div>
                 ) : (
                     <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                        {filteredUsers.map((user, index) => (
-                            <UserCard key={user.id} user={user} index={index} />
+                        {pagedUsers.map((user, index) => (
+                            <UserCard key={user.id} user={user} index={(currentPage - 1) * PAGE_SIZE + index} />
                         ))}
                     </div>
                 )}
             </section>
 
             {!loading && !error && filteredUsers.length > 0 && (
-                <div className="flex items-center justify-center gap-2 pt-1 text-xs text-slate-400">
-                    {sortOrder.includes("desc") ? (
-                        <ArrowDownAZ size={14} aria-hidden="true" />
-                    ) : (
-                        <ArrowUpAZ size={14} aria-hidden="true" />
-                    )}
-                    Showing {filteredUsers.length} of {users.length} customer profiles
+                <div className="space-y-3">
+                    <p className="flex items-center justify-center gap-2 text-xs text-slate-400">
+                        {sortOrder.includes("desc") ? (
+                            <ArrowDownAZ size={14} aria-hidden="true" />
+                        ) : (
+                            <ArrowUpAZ size={14} aria-hidden="true" />
+                        )}
+                        Showing {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredUsers.length)} of {filteredUsers.length} matching customer profiles ({users.length} total)
+                    </p>
+                    <Pagination
+                        currentPage={currentPage}
+                        label="customer"
+                        onPageChange={setPage}
+                        pageCount={pageCount}
+                    />
                 </div>
             )}
         </div>

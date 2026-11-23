@@ -157,6 +157,9 @@ function ProductDialog({
                 </div>
             ) : (
                 <form className="space-y-4 px-5 py-6 sm:px-7" onSubmit={handleSubmit}>
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 px-3.5 py-3 text-xs leading-5 text-amber-900" role="note">
+                        <span className="font-semibold">Demo limitation:</span> This create/update is simulated by Fake Store API. The change lasts only in this page session and is not saved permanently.
+                    </div>
                     <label className="block text-sm font-medium text-slate-700">
                         Product name
                         <input
@@ -535,6 +538,13 @@ export default function Products() {
                     </div>
                 </div>
             </header>
+
+            <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3.5 text-sm text-amber-900" role="note">
+                <CircleAlert className="mt-0.5 shrink-0 text-amber-700" size={17} aria-hidden="true" />
+                <p className="leading-5">
+                    <span className="font-semibold">Simulated product CRUD:</span> Fake Store API may accept create, update, and delete responses, but it does not persist these changes. Added, edited, or removed products remain changed only until the page is refreshed or reopened.
+                </p>
+            </div>
 
             {notice && (
                 <div className="flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm text-emerald-900" role="status">

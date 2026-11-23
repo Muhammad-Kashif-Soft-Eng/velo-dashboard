@@ -2,8 +2,11 @@
 import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
+import ProtectedRoute from "./components/ProtectedRoute";
 import MainLayout from "./components/layouts/MainLayout";
 import Home from "./pages/Home";
+import Login from "./pages/Login";
+import NotFound from "./pages/NotFound";
 import Users from "./pages/Users";
 import Products from "./pages/Products";
 import Orders from "./pages/Orders";
@@ -15,7 +18,14 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route element={<MainLayout />}>
+        <Route path="/login" element={<Login />} />
+        <Route
+          element={(
+            <ProtectedRoute>
+              <MainLayout />
+            </ProtectedRoute>
+          )}
+        >
           <Route path="/" element={<Home />} />
           <Route path="/users" element={<Users />} />
           <Route path="/products" element={<Products />} />
@@ -30,6 +40,7 @@ export default function App() {
           />
           <Route path="/settings" element={<Settings />} />
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   );

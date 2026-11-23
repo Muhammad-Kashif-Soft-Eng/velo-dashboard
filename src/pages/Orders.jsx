@@ -15,8 +15,10 @@ import {
     WalletCards,
 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import Pagination from "@/components/Pagination";
 
 const API_URL = "https://fakestoreapi.com";
+const PAGE_SIZE = 5;
 
 const currency = new Intl.NumberFormat("en-US", {
     style: "currency",
@@ -113,6 +115,7 @@ export default function Orders() {
     const [search, setSearch] = useState("");
     const [sortOrder, setSortOrder] = useState("newest");
     const [expandedOrder, setExpandedOrder] = useState(null);
+    const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [reloadKey, setReloadKey] = useState(0);
@@ -188,7 +191,7 @@ export default function Orders() {
         };
     }, [reloadKey]);
 
-    const visibleOrders = useMemo(() => {
+    const filteredOrders = useMemo(() => {
         const query = search.trim().toLowerCase();
         const matchingOrders = orders.filter((order) => {
             const searchableText = [
@@ -207,6 +210,13 @@ export default function Orders() {
             return getOrderDate(second) - getOrderDate(first);
         });
     }, [orders, search, sortOrder]);
+
+    const pageCount = Math.max(1, Math.ceil(filteredOrders.length / PAGE_SIZE));
+    const currentPage = Math.min(page, pageCount);
+    const visibleOrders = filteredOrders.slice(
+        (currentPage - 1) * PAGE_SIZE,
+        currentPage * PAGE_SIZE,
+    );
 
     const totalItems = orders.reduce((count, order) => count + order.itemCount, 0);
     const totalRevenue = orders.reduce((total, order) => total + order.total, 0);
@@ -261,7 +271,7 @@ export default function Orders() {
                             All orders
                         </h3>
                         <p className="mt-1 text-sm text-slate-500">
-                            {loading ? "Loading orders..." : `${visibleOrders.length} of ${orders.length} orders`}
+                            {loading ? "Loading orders..." : `${filteredOrders.length} of ${orders.length} orders`}
                         </p>
                     </div>
                     <div className="flex min-w-0 flex-col gap-2 sm:w-auto sm:flex-row">
@@ -274,7 +284,10 @@ export default function Orders() {
                             <span className="sr-only">Search orders</span>
                             <input
                                 className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-800 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-indigo-400 focus:ring-4 focus:ring-indigo-100"
-                                onChange={(event) => setSearch(event.target.value)}
+                                onChange={(event) => {
+                                    setSearch(event.target.value);
+                                    setPage(1);
+                                }}
                                 placeholder="Search orders..."
                                 type="search"
                                 value={search}
@@ -282,7 +295,10 @@ export default function Orders() {
                         </label>
                         <Select.Root
                             items={sortOptions}
-                            onValueChange={setSortOrder}
+                            onValueChange={(value) => {
+                                setSortOrder(value);
+                                setPage(1);
+                            }}
                             value={sortOrder}
                         >
                             <Select.Trigger
@@ -364,7 +380,7 @@ export default function Orders() {
                             Try again
                         </button>
                     </div>
-                ) : visibleOrders.length === 0 ? (
+                ) : filteredOrders.length === 0 ? (
                     <div className="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-14 text-center">
                         <div className="mx-auto grid size-12 place-items-center rounded-2xl bg-slate-100 text-slate-500">
                             <Search size={21} aria-hidden="true" />
@@ -377,90 +393,101 @@ export default function Orders() {
                         </p>
                     </div>
                 ) : (
-                    <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_8px_30px_-24px_rgba(15,23,42,0.3)]">
-                        <div className="overflow-x-auto">
-                            <table className="w-full min-w-[720px] border-collapse text-left">
-                                <thead>
-                                    <tr className="border-b border-slate-100 bg-slate-50/80 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                                        <th className="px-5 py-3.5" scope="col">Order</th>
-                                        <th className="px-5 py-3.5" scope="col">Customer</th>
-                                        <th className="px-5 py-3.5" scope="col">Date</th>
-                                        <th className="px-5 py-3.5" scope="col">Items</th>
-                                        <th className="px-5 py-3.5 text-right" scope="col">Total</th>
-                                        <th className="px-5 py-3.5 text-right" scope="col">Details</th>
-                                    </tr>
-                                </thead>
-                                {visibleOrders.map((order) => {
-                                    const isExpanded = expandedOrder === order.id;
-                                    const customerName = getCustomerName(order.customer);
+                    <div className="space-y-4">
+                        <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_8px_30px_-24px_rgba(15,23,42,0.3)]">
+                            <div className="overflow-x-auto">
+                                <table className="w-full min-w-[720px] border-collapse text-left">
+                                    <thead>
+                                        <tr className="border-b border-slate-100 bg-slate-50/80 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                                            <th className="px-5 py-3.5" scope="col">Order</th>
+                                            <th className="px-5 py-3.5" scope="col">Customer</th>
+                                            <th className="px-5 py-3.5" scope="col">Date</th>
+                                            <th className="px-5 py-3.5" scope="col">Items</th>
+                                            <th className="px-5 py-3.5 text-right" scope="col">Total</th>
+                                            <th className="px-5 py-3.5 text-right" scope="col">Details</th>
+                                        </tr>
+                                    </thead>
+                                    {visibleOrders.map((order) => {
+                                        const isExpanded = expandedOrder === order.id;
+                                        const customerName = getCustomerName(order.customer);
 
-                                    return (
-                                        <tbody className="border-b border-slate-100 last:border-0" key={order.id}>
-                                            <tr className="transition hover:bg-slate-50/70">
-                                                <th className="px-5 py-4 text-sm font-semibold text-slate-800" scope="row">
-                                                    <span className="inline-flex items-center gap-2">
-                                                        <span className="grid size-9 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
-                                                            <PackageCheck size={16} aria-hidden="true" />
+                                        return (
+                                            <tbody className="border-b border-slate-100 last:border-0" key={order.id}>
+                                                <tr className="transition hover:bg-slate-50/70">
+                                                    <th className="px-5 py-4 text-sm font-semibold text-slate-800" scope="row">
+                                                        <span className="inline-flex items-center gap-2">
+                                                            <span className="grid size-9 place-items-center rounded-xl bg-indigo-50 text-indigo-600">
+                                                                <PackageCheck size={16} aria-hidden="true" />
+                                                            </span>
+                                                            <span>#{order.id}</span>
                                                         </span>
-                                                        <span>#{order.id}</span>
-                                                    </span>
-                                                </th>
-                                                <td className="px-5 py-4">
-                                                    <div className="flex items-center gap-2.5">
-                                                        <span className="grid size-8 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-600">
-                                                            <UsersRound size={15} aria-hidden="true" />
-                                                        </span>
-                                                        <div className="min-w-0">
-                                                            <p className="truncate text-sm font-medium text-slate-800">{customerName}</p>
-                                                            <p className="truncate text-xs text-slate-400">
-                                                                {order.customer?.email || "No email provided"}
-                                                            </p>
+                                                    </th>
+                                                    <td className="px-5 py-4">
+                                                        <div className="flex items-center gap-2.5">
+                                                            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-600">
+                                                                <UsersRound size={15} aria-hidden="true" />
+                                                            </span>
+                                                            <div className="min-w-0">
+                                                                <p className="truncate text-sm font-medium text-slate-800">{customerName}</p>
+                                                                <p className="truncate text-xs text-slate-400">
+                                                                    {order.customer?.email || "No email provided"}
+                                                                </p>
+                                                            </div>
                                                         </div>
-                                                    </div>
-                                                </td>
-                                                <td className="px-5 py-4 text-sm text-slate-600">
-                                                    <span className="inline-flex items-center gap-2">
-                                                        <CalendarDays size={15} className="text-slate-400" aria-hidden="true" />
-                                                        {formatDate(order.date)}
-                                                    </span>
-                                                </td>
-                                                <td className="px-5 py-4 text-sm text-slate-600">
-                                                    {order.itemCount} {order.itemCount === 1 ? "item" : "items"}
-                                                </td>
-                                                <td className="px-5 py-4 text-right text-sm font-semibold text-slate-900">
-                                                    {currency.format(order.total)}
-                                                </td>
-                                                <td className="px-5 py-4 text-right">
-                                                    <button
-                                                        aria-expanded={isExpanded}
-                                                        aria-label={`${isExpanded ? "Hide" : "View"} items for order ${order.id}`}
-                                                        className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100"
-                                                        onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
-                                                        type="button"
-                                                    >
-                                                        {isExpanded ? "Hide" : "View"}
-                                                        {isExpanded
-                                                            ? <ChevronUp size={14} aria-hidden="true" />
-                                                            : <ChevronDown size={14} aria-hidden="true" />}
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                            {isExpanded && (
-                                                <tr>
-                                                    <td className="bg-slate-50/70 px-5 py-4" colSpan={6}>
-                                                        {order.items.length ? (
-                                                            <OrderItems items={order.items} />
-                                                        ) : (
-                                                            <p className="text-sm text-slate-500">This order has no item details.</p>
-                                                        )}
+                                                    </td>
+                                                    <td className="px-5 py-4 text-sm text-slate-600">
+                                                        <span className="inline-flex items-center gap-2">
+                                                            <CalendarDays size={15} className="text-slate-400" aria-hidden="true" />
+                                                            {formatDate(order.date)}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-5 py-4 text-sm text-slate-600">
+                                                        {order.itemCount} {order.itemCount === 1 ? "item" : "items"}
+                                                    </td>
+                                                    <td className="px-5 py-4 text-right text-sm font-semibold text-slate-900">
+                                                        {currency.format(order.total)}
+                                                    </td>
+                                                    <td className="px-5 py-4 text-right">
+                                                        <button
+                                                            aria-expanded={isExpanded}
+                                                            aria-label={`${isExpanded ? "Hide" : "View"} items for order ${order.id}`}
+                                                            className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-slate-200 px-3 text-xs font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-indigo-100"
+                                                            onClick={() => setExpandedOrder(isExpanded ? null : order.id)}
+                                                            type="button"
+                                                        >
+                                                            {isExpanded ? "Hide" : "View"}
+                                                            {isExpanded
+                                                                ? <ChevronUp size={14} aria-hidden="true" />
+                                                                : <ChevronDown size={14} aria-hidden="true" />}
+                                                        </button>
                                                     </td>
                                                 </tr>
-                                            )}
-                                        </tbody>
-                                    );
-                                })}
-                            </table>
+                                                {isExpanded && (
+                                                    <tr>
+                                                        <td className="bg-slate-50/70 px-5 py-4" colSpan={6}>
+                                                            {order.items.length ? (
+                                                                <OrderItems items={order.items} />
+                                                            ) : (
+                                                                <p className="text-sm text-slate-500">This order has no item details.</p>
+                                                            )}
+                                                        </td>
+                                                    </tr>
+                                                )}
+                                            </tbody>
+                                        );
+                                    })}
+                                </table>
+                            </div>
                         </div>
+                        <Pagination
+                            currentPage={currentPage}
+                            label="order"
+                            onPageChange={(nextPage) => {
+                                setExpandedOrder(null);
+                                setPage(nextPage);
+                            }}
+                            pageCount={pageCount}
+                        />
                     </div>
                 )}
             </section>
